@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xsy.smbms.mapper.user.UserMapper">
+    <resultMap id="userList" type="User">
+        <result property="userRoleName" column="roleName"></result>
+    </resultMap>
+
+    <!--根据id查询用户-->
+    <select id="getUserById" resultMap="userList">
+        select u.*,r.roleName as userRoleName from smbms_user u,smbms_role r where u.id=#{id} and u.userRole = r.id
+    </select>
+
+    <!--登录-->
+    <select id="getLoginUser" resultMap="userList">
+        select * from smbms_user
+        where userCode=#{userCode} and userPassword=#{userPassword}
+    </select>
+
+    <!--查询用户列表并分页-->
+    <select id="getUserList" resultMap="userList">
+        SELECT u.*, r.roleName FROM smbms_user u
+        INNER JOIN smbms_role r ON u.userRole=r.id
+    <where>
+        <if test="userName !=null and userName!=''">
+            userName LIKE "%"#{userName}"%"
+        </if>
+        <if test="userRole != null and userRole != 0">
+            and userRole =#{userRole}
+        </if>
+    </where>
+        limit #{startIndex},#{pageSize}
+</select>
+
+    <!--通过用户编码获取用户-->
+    <select id="getUserByUserCode" resultType="user">
+        SELECT * from smbms_user WHERE userCode=#{userCode}
+    </select>
+
+
+
+
+    <!--获取userRoleId-->
+
+    <select id="getUserCount" resultType="int">
+        SELECT count(*) FROM smbms_user t1 INNER JOIN smbms_role t2 ON t1.userRole=t2.id
+        <where>
+            <if test="userName!=null and userName !='' ">
+                userName LIKE "%"#{userName}"%"
+            </if>
+            <if test="userRole != null and userRole != 0 ">
+                and userRole = #{userRole}
+            </if>
+        </where>
+    </select>
+
+
+    <!--添加用户-->
+    <insert id="add">
+        insert into smbms_user (userCode,userName,userPassword,
+        userRole,gender,birthday,phone,address,creationDate,createdBy,idPicPath)
+        values(#{userCode},#{userName},#{userPassword},#{userRole},#{gender},#{birthday},
+        #{phone},#{address},#{creationDate},#{createdBy},#{idPicPath})
+    </insert>
+
+
+
+    <update id="modify">
+        update smbms_user
+        <trim prefix="set" suffixOverrides="," suffix="where id=#{id}">
+            <if test="userCode != null and userCode!= ''">userCode=#{userCode},</if>
+            <if test="userName !=null and userName != '' ">userName=#{userName}, </if>
+            <if test="userPassword !=null and userPassword != '' ">userPassword=#{userPassword}, </if>
+            <if test="gender !=null and gender != '' ">gender=#{gender}, </if>
+            <if test="birthday !=null and birthday != '' ">birthday=#{birthday}, </if>
+            <if test="phone !=null and phone != '' ">phone=#{phone}, </if>
+            <if test="userCode !=null and userCode != '' ">address=#{address}, </if>
+            <if test="address !=null and userRole != '' ">userRole=#{userRole}, </if>
+            <if test="createdBy !=null and createdBy != '' ">createdBy=#{createdBy}, </if>
+            <if test="creationDate !=null and creationDate != '' ">creationDate=#{creationDate}, </if>
+            <if test="modifyBy !=null and modifyBy != '' ">modifyBy=#{modifyBy}, </if>
+            <if test="modifyDate !=null and modifyDate != '' ">modifyDate=#{modifyDate} </if>
+        </trim>
+
+    </update>
+
+
+    <delete id="deleteUserById">
+        delete from smbms_user WHERE id = #{id}
+    </delete>
+
+
+
+
+</mapper>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <!--<bean name="/index.do" class="xsy.smbms.controller.IndexController"></bean>-->
+    <!--<bean name="/welcome.do" class="xsy.smbms.controller.WelcomeController"></bean>-->
+    <!--开启扫描包-->
+    <context:component-scan base-package="xsy.smbms.controller"></context:component-scan>
+    <!--启动注解驱动-->
+    <mvc:annotation-driven conversion-service="myconversionService">
+        <!--解决返回数据中文乱码-->
+        <mvc:message-converters>
+
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+            <!--把bean转成json-->
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <list>
+                        <!--返回日期格式转换器-->
+                        <value>WriteDateUseDateFormat</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--接收日期数据-->
+    <bean id="myconversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="xsy.smbms.convertor.MyDateConvertor"></bean>
+            </set>
+        </property>
+    </bean>
+
+    <!-- 上传文件解析器，使用spring的CommonsMultipartResolver -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--上传文件大小上限，单位为字节5M=5*1024*1204=5242880-->
+        <property name="maxUploadSize" value="5000000"></property>
+        <!--请求的编码格式，默认为ISO-8859-1，此处设置为UTF-8-->
+        <property name="defaultEncoding" value="UTF-8"></property>
+    </bean>
+
+
+
+
+    <!--视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="order" value="1"></property>
+        <!--前缀-->
+        <property name="prefix" value="/WEB-INF/jsp/"></property>
+        <!--后缀-->
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+    <!--不拦截静态资源-->
+    <mvc:default-servlet-handler/>
+
+    <!--全局异常处理-->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <!--可自定义异常类型，跳转到不同的视图-->
+            <props>
+                <prop key="java.lang.RuntimeException">error</prop>
+            </props>
+        </property>
+        <property name="exceptionAttribute" value="error"/>
+    </bean>
+</beans>
